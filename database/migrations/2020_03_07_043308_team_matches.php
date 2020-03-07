@@ -18,6 +18,7 @@ class TeamMatches extends Migration
             $table->integer('team_id')->unsigned();
             $table->integer('match_id')->unsigned();
             $table->integer('goals');
+            $table->enum('venue',['home','away'])->default('home');
             $table->enum('result',['won','lost','drawn','no_result'])->default('no_result');
             $table->foreign('team_id')->on('teams')->references('id');
             $table->foreign('match_id')->on('matches')->references('id');
@@ -32,6 +33,6 @@ class TeamMatches extends Migration
      */
     public function down()
     {
-        Schema::DropIfExists('matches');
+        Schema::dropIfExists('matches');
     }
 }

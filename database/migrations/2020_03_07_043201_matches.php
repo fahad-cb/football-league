@@ -16,6 +16,8 @@ class Matches extends Migration
         Schema::create('matches',function(Blueprint $table){
             $table->increments('id');
             $table->integer('match_number');
+            $table->integer('round_id')->unsigned();
+            $table->foreign('round_id')->on('rounds')->references('id')->onDelete('cascade');;
             $table->timestamps();
         });
     }
@@ -27,6 +29,6 @@ class Matches extends Migration
      */
     public function down()
     {
-        Schema::DropIfExists('matches');
+        Schema::dropIfExists('matches');
     }
 }

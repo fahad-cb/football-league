@@ -18,7 +18,7 @@ class Teams extends Model
      * @var array
      */
     protected $fillable = [
-        'matches_played', 'matches_won','matches_lost','prmatches_drawn','total_goals'
+        'matches_played', 'matches_won','matches_lost','matches_drawn','total_goals'
     ];
 
 

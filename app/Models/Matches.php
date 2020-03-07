@@ -11,7 +11,7 @@ class Matches extends Model
 {
     
 
-    protected $table = 'teams';
+    protected $table = 'matches';
     /**
      * The attributes that are mass assignable.
      *
