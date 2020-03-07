@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
 Route::get('/', 'MatchesController@index');
+Route::post('/play_all', 'MatchesController@playAllMatches');
+Route::post('/play_round', 'MatchesController@playRoundMatches');
+Route::post('/reset_all', 'MatchesController@resetAll');
 
 
