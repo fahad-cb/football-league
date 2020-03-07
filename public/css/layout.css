@@ -1,0 +1,13 @@
+.navbar-laravel {
+  background-color: #fff !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+}
+
+.app-container {
+	margin-top: 30px;
+  	background-color: #fff;
+  	margin-bottom: 50px;
+  	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4) !important;
+}
+
+
