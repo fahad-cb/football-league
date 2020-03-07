@@ -10,6 +10,7 @@ use App\Models\Teams;
 use App\Models\Matches;
 use App\Models\TeamMatches;
 use App\Models\Rounds;
+use DB;
 
 class MatchesController extends Controller
 {
@@ -45,6 +46,15 @@ class MatchesController extends Controller
         return view('index',compact('teams'));
     }
 
+
+    /**
+     * @method : playAllMatches()
+     * @author : adventivepk@gmail.com <Fahad Abbas>
+     * @param  : Request  
+     * @return : Json response for TEams
+     * @since : 07/03/2020
+     * @example : none
+    */
     public function playAllMatches(Request $request){
 
         extract($request->all());
@@ -62,7 +72,7 @@ class MatchesController extends Controller
                     "updated_at" => \Carbon\Carbon::now(), 
                 ];
                 $this->rounds->insert($roundData);
-                $roundId = \DB::getPdo()->lastInsertId();;
+                $roundId = DB::getPdo()->lastInsertId();;
                
     
                 // checking for if round has been created
@@ -76,7 +86,7 @@ class MatchesController extends Controller
                             "updated_at" => \Carbon\Carbon::now(), 
                         ];
                         $this->matches->insert($matchData);
-                        $matchId = \DB::getPdo()->lastInsertId();
+                        $matchId = DB::getPdo()->lastInsertId();
     
                         //checking for if match has been created
                         if ( $matchId ){
@@ -97,6 +107,7 @@ class MatchesController extends Controller
                                 //setting up data for each match
                                 $teamMatchData = [
                                     "match_id" => $matchId,
+                                    "round_id" => $roundId,
                                     "venue" => strtolower($key),
                                     "team_id" =>  $team_matches['id'],
                                     "goals" => $team_matches['goals'],
@@ -133,15 +144,35 @@ class MatchesController extends Controller
     }
 
 
-
+    /**
+     * @method : playRoundMatches()
+     * @author : adventivepk@gmail.com <Fahad Abbas>
+     * @param  : Request   (round number)
+     * @return : Json response for TEams
+     * @since : 07/03/2020
+     * @example : none
+    */
     public function playRoundMatches(Request $request){
 
         extract($request->all());
         $numberofteams = $this->teams->count();
         $teams = $this->teams->get()->toArray();
 
+        $validator = \Validator::make($request->all(), [
+			'round_number' => 'required|integer',
+		],$this->messages);
+	
+		if ($validator->fails()) {
+			$data['data'] = null;
+			$data['code'] = 400;
+			$data['msg'] = $validator->errors()->first();
+			$data['response'] = 'ok';
+			return response()->json($data, $data['code']); 
+		}
+
         $round_matches = roundRobin($teams);
         $round = $round_matches[$round_number-1];
+        
 
         try{
 
@@ -157,7 +188,7 @@ class MatchesController extends Controller
                 "updated_at" => \Carbon\Carbon::now(), 
             ];
             $this->rounds->insert($roundData);
-            $roundId = \DB::getPdo()->lastInsertId();;
+            $roundId = DB::getPdo()->lastInsertId();;
     
             // checking for if round has been created
             if ( $roundId ){
@@ -170,7 +201,7 @@ class MatchesController extends Controller
                         "updated_at" => \Carbon\Carbon::now(), 
                     ];
                     $this->matches->insert($matchData);
-                    $matchId = \DB::getPdo()->lastInsertId();
+                    $matchId = DB::getPdo()->lastInsertId();
     
                     //checking for if match has been created
                     if ( $matchId ){
@@ -191,6 +222,7 @@ class MatchesController extends Controller
                             //setting up data for each match
                             $teamMatchData = [
                                 "match_id" => $matchId,
+                                "round_id" => $roundId,
                                 "venue" => strtolower($key),
                                 "team_id" =>  $team_matches['id'],
                                 "goals" => $team_matches['goals'],
@@ -224,7 +256,14 @@ class MatchesController extends Controller
         
     }
 
-
+    /**
+     * @method : updateTeams()
+     * @author : adventivepk@gmail.com <Fahad Abbas>
+     * @param  : Teams   (array)
+     * @return : Json response for TEams
+     * @since : 07/03/2020
+     * @example : none
+    */
     private function updateTeams(array $teams){
         // updating records for all teams
         foreach ($teams as $key => $team) {
@@ -232,20 +271,27 @@ class MatchesController extends Controller
             $teamdata['matches_won'] = $this->team_matches->where('team_id',$team['id'])->where('result','won')->count();
             $teamdata['matches_lost'] = $this->team_matches->where('team_id',$team['id'])->where('result','lost')->count();
             $teamdata['matches_drawn'] = $this->team_matches->where('team_id',$team['id'])->where('result','drawn')->count();
-            $teamdata['total_goals'] =  $this->team_matches->select(\DB::raw('SUM(goals) as total_goals'))->where('team_id',$team['id'])->first()->total_goals;
+            $teamdata['total_goals'] =  $this->team_matches->select(DB::raw('SUM(goals) as total_goals'))->where('team_id',$team['id'])->first()->total_goals;
             $this->teams->where('id',$team['id'])->update($teamdata);
         }
         
     }
 
-
+    /**
+     * @method : ResetAll()
+     * @author : adventivepk@gmail.com <Fahad Abbas>
+     * @param  : Teams   (array)
+     * @return : Json response for TEams
+     * @since : 07/03/2020
+     * @example :this method flushes all the data for matches and rounds
+    */
     public function ResetAll(){
         // updating records for all teams
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         TeamMatches::query()->truncate();
         Matches::query()->truncate();
         Rounds::query()->truncate();
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
        
         $teams  = $this->teams->get()->toArray();
         foreach ($teams as $team) {
@@ -262,6 +308,66 @@ class MatchesController extends Controller
         $data['msg'] = 'success';
         $data['response'] = 'ok';
         return response()->json($data, $data['code']);
+
+
+    }
+
+     /**
+     * @method : RoundMatches matches()
+     * @author : adventivepk@gmail.com <Fahad Abbas>
+     * @param  : Teams   (array)
+     * @return : Json response for TEams
+     * @since : 07/03/2020
+     * @example :this method flushes all the data for matches and rounds
+    */
+    public function RoundMatches(Request $request){
+
+        extract($request->all());
+        // updating records for all teams
+
+        $validator = \Validator::make($request->all(), [
+			'round_number' => 'required|integer',
+		],$this->messages);
+	
+		if ($validator->fails()) {
+			$data['data'] = null;
+			$data['code'] = 400;
+			$data['msg'] = $validator->errors()->first();
+			$data['response'] = 'ok';
+			return response()->json($data, $data['code']); 
+		}
+        try{
+            
+            $round = $this->rounds->select('id')->where('round',$round_number)->first();
+            if (!$round){
+                throw new Exception("No round found",404);
+            }
+            $matches = $this->team_matches->where('round_id',$round->id)->get()->toArray();
+            $results = DB::table('team_matches')
+                        ->join('teams', 'teams.id', '=', 'team_matches.team_id')
+                        ->where('team_matches.round_id',$round->id)
+                        ->select('teams.team_name', 'team_matches.goals' ,'team_matches.match_id')
+                        ->orderBy('team_matches.match_id','DESC')
+                        ->get()->toArray();
+
+            //processing a bit of code
+            //$newResults = array();
+           
+            $data['data'] = ['matches'=> $results];
+            $data['code'] = 200;
+            $data['msg'] = 'success';
+            $data['response'] = 'ok';
+            return response()->json($data, $data['code']);
+        }catch(Exception $e){
+
+            $data['data'] = null;
+            $data['code'] = 400;
+            $data['msg'] = $e->getMessage();
+            $data['response'] = 'error';
+            return response()->json($data, $data['code']);
+        }
+       
+       
 
 
     }
