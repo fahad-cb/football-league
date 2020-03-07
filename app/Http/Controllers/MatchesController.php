@@ -42,7 +42,21 @@ class MatchesController extends Controller
     */
     public function index()
     {
-        $teams = $this->teams->OrderBy('matches_won','DESC')->get();
+        
+        
+        $teamsTemp = $this->teams->OrderBy('matches_won','DESC')->get();
+        $worthy = $this->teams->where('matches_won','>','0')->count();
+        foreach ($teamsTemp as $key => $team) {
+            if ($team->matches_played > 0){
+                $wins = $team->matches_won;
+                $draws = $team->matches_drawn;
+                $win_percentage = ( $wins + $draws / 2 ) /  ( $team->matches_played );
+                $team['win_percentage'] = round(( $win_percentage / $worthy ) * 100);
+            }else{
+                $team['win_percentage'] = 0;
+            }
+            $teams[] = $team;
+        }
         return view('index',compact('teams'));
     }
 
@@ -125,7 +139,21 @@ class MatchesController extends Controller
                 }
             }
 
-            $data['data'] = ['teams'=> $this->teams->get()->toArray()];
+            $teamsTemp = $this->teams->OrderBy('matches_won','DESC')->get();
+            $worthy = $this->teams->where('matches_won','>','0')->count();
+            foreach ($teamsTemp as $key => $team) {
+                if ($team->matches_played > 0){
+                    $wins = $team->matches_won;
+                    $draws = $team->matches_drawn;
+                    $win_percentage = ( $wins + $draws / 2 ) /  ( $team->matches_played );
+                    $team['win_percentage'] = round( ( $win_percentage / $worthy ) * 100);
+                }else{
+                    $team['win_percentage'] = 0;
+                }
+                $teams[] = $team;
+            }
+
+            $data['data'] = ['teams'=> $teams];
             $data['code'] = 200;
             $data['msg'] = 'success';
             $data['response'] = 'ok';
@@ -239,7 +267,21 @@ class MatchesController extends Controller
                 }
             }
 
-            $data['data'] = ['teams'=> $this->teams->get()->toArray()];
+            $teamsTemp = $this->teams->OrderBy('matches_won','DESC')->get();
+            $worthy = $this->teams->where('matches_won','>','0')->count();
+            foreach ($teamsTemp as $key => $team) {
+                if ($team->matches_played > 0){
+                    $wins = $team->matches_won;
+                    $draws = $team->matches_drawn;
+                    $win_percentage = ( $wins + $draws / 2 ) /  ( $team->matches_played );
+                    $team['win_percentage'] = round( ( $win_percentage / $worthy ) * 100);
+                }else{
+                    $team['win_percentage'] = 0;
+                }
+                $teams[] = $team;
+            }
+            
+            $data['data'] = ['teams'=> $teams ];
             $data['code'] = 200;
             $data['msg'] = 'success';
             $data['response'] = 'ok';
@@ -274,7 +316,6 @@ class MatchesController extends Controller
             $teamdata['total_goals'] =  $this->team_matches->select(DB::raw('SUM(goals) as total_goals'))->where('team_id',$team['id'])->first()->total_goals;
             $this->teams->where('id',$team['id'])->update($teamdata);
         }
-        
     }
 
     /**

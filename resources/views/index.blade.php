@@ -21,7 +21,7 @@
           <tbody>
             @foreach ($teams as $team)
             <tr>
-              <th scope="row">{{ $team->team_name }}</th>
+              <th scope="row" id="name-{{$team->id}}">{{ $team->team_name }}</th>
               <td id="played-{{$team->id}}">{{ $team->matches_played }}</td>
               <td id="won-{{$team->id}}">{{ $team->matches_won }}</td>
               <td id="lost-{{$team->id}}">{{ $team->matches_lost }}</td>
@@ -44,7 +44,7 @@
             @foreach ($teams as $team)
             <tr>
               <th scope="row">{{ $team->team_name }}</th>
-              <td> 0%</td>
+              <td id="win-{{$team->id}}"> {{ $team->win_percentage }}%</td>
             </tr>
             @endforeach
           </tbody>
@@ -129,11 +129,13 @@
                 if (results){
                   let teams = results.data.teams;
                   for( let i = 0 ; i <  results.data.teams.length ; i++){
+                    $("#name-"+teams[i].id).html(teams[i].team_name);
                     $("#played-"+teams[i].id).html(teams[i].matches_played);
                     $("#won-"+teams[i].id).html(teams[i].matches_won);
                     $("#lost-"+teams[i].id).html(teams[i].matches_lost);
                     $("#drawn-"+teams[i].id).html(teams[i].matches_drawn);
                     $("#goals-"+teams[i].id).html(teams[i].total_goals);
+                    $("#win-"+teams[i].id).html(teams[i].win_percentage + "%");
                   }
                   jQuery.ajax({
                     url: "{{ url('/round_matches?round_number=') }}" + round,
@@ -177,11 +179,13 @@
              
               let teams = results.data.teams;
               for( let i = 0 ; i <  results.data.teams.length ; i++){
+                $("#name-"+teams[i].id).html(teams[i].team_name);
                 $("#played-"+teams[i].id).html(teams[i].matches_played);
                 $("#won-"+teams[i].id).html(teams[i].matches_won);
                 $("#lost-"+teams[i].id).html(teams[i].matches_lost);
                 $("#drawn-"+teams[i].id).html(teams[i].matches_drawn);
                 $("#goals-"+teams[i].id).html(teams[i].total_goals);
+                $("#win-"+teams[i].id).html(teams[i].win_percentage + "%");
               }
 
               jQuery.ajax({
@@ -225,11 +229,13 @@
           if (results){
             let teams = results.data.teams;
             for( let i = 0 ; i <  results.data.teams.length ; i++){
+              $("#name-"+teams[i].id).html(teams[i].team_name);
               $("#played-"+teams[i].id).html(teams[i].matches_played);
               $("#won-"+teams[i].id).html(teams[i].matches_won);
               $("#lost-"+teams[i].id).html(teams[i].matches_lost);
               $("#drawn-"+teams[i].id).html(teams[i].matches_drawn);
               $("#goals-"+teams[i].id).html(teams[i].total_goals);
+              $("#win-"+teams[i].id).html("0%");
             }
             $(".goal-0").html('0');
             $(".goal-1").html('0');
