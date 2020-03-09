@@ -13,3 +13,7 @@
 -   `php artisan migrate`
 -   `php artisan db:seed --class=TeamsTableSeeder`
 -   `php artisan serve`
+
+## preview
+
+![homepage](https://github.com/fahad-cb/football-league/blob/master/screenshot.png)
