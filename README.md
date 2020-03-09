@@ -1,5 +1,5 @@
 # football-league
-
+`This app simulates a football league (round robin) and predicts the win probabilty round wise`
 
 ## Presequites 
 - `lampstack`
